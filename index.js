@@ -11,13 +11,14 @@ import passportRouter from "./src/routes/authRouter.js";
 
 const app = express();
 
+
+const PORT = 5000;
+
 dotenv.config();
 
 app.use(cookieSession({name: "session", keys: ["cstart"], maxAge: 24 * 60 * 60 * 100}))
 
 
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(cors(
     {
@@ -26,6 +27,10 @@ app.use(cors(
         credentials: true
     }
 ))
+
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.json());
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -82,7 +87,6 @@ passport.deserializeUser((user, done) => {
     done(null, user);
   });
 
-const PORT = 5000;
 
 app.use("/api/v1/auth", passportRouter);
 

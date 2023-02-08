@@ -1,9 +1,14 @@
 import express from "express";
 import passport from "passport";
+import { Signup, Signin, activationEmail } from "../controllers/authController.js";
 
 const router = express.Router();
 
-const CLIENT_URL = "http://localhost:3010"
+const CLIENT_URL = "http://localhost:3010";
+
+router.post("/signup", Signup);
+router.post("/activate", activationEmail);
+router.post("/signin", Signin);
 
 router.get("/google", passport.authenticate("google", {scope:["profile"]}));
 

@@ -1,6 +1,5 @@
 import {DataTypes} from 'sequelize';
 import { sequelize } from '../config/connectDb.js';
-import VerificationToken from './verificationToken.js';
 
 const Users = sequelize.define("Users", {
   email: {
@@ -15,13 +14,5 @@ const Users = sequelize.define("Users", {
     type: DataTypes.STRING
   }  
 });
-
-Users.associations = (models) => {
-  Users.hasOne(VerificationToken, {
-    as: 'verificationtoken',
-    foreignKey: 'userId',
-    foreignKeyConstraint: true
-  })
-}
 
 export default Users;
