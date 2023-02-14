@@ -21,6 +21,7 @@ export const Signup = async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
+      const confirm_password = req.body.confirm_password;
     //   const user = await Users.findOne({ email });
     //   if(!user) {
     //       return res.status(401).json({
@@ -35,12 +36,12 @@ export const Signup = async (req, res) => {
     //     })
     //   }
 
-      const newUser = { email, password };
+      const newUser = { email, password, confirm_password };
      
       const activation_token = createActivationToken(newUser);
-      const url = `${CLIENT_URL}/api/v1/auth/activate/${activation_token}`
+      const url = `http://localhost:5000/api/v1/auth/activate/${activation_token}`
       sendEmail(email, url, "Verify Your EmaiACTIVATION_TOKEN_SECRETl Address")
-
+      res.status(200).send({message: "Email sent successfully"});
   } catch (err) {
      res.status(500).send({message: err.message});
   }
@@ -103,5 +104,5 @@ export const activationEmail = async (req, res) => {
   }
 
 const createActivationToken = (payload) => {
-    return jwt.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, {expiresIn: '5m'})
+    return jwt.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, {expiresIn: '10m'})
 }

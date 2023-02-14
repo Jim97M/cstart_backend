@@ -8,6 +8,7 @@ import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GithubStrategy } from "passport-github2";
 
 import passportRouter from "./src/routes/authRouter.js";
+import roleRouter from "./src/routes/roleRouter.js"; 
 
 const app = express();
 
@@ -16,17 +17,14 @@ const PORT = 5000;
 
 dotenv.config();
 
+let corsOptions = {
+  localhost: "http://localhost:5000"
+};
+
 app.use(cookieSession({name: "session", keys: ["cstart"], maxAge: 24 * 60 * 60 * 100}))
 
 
-
-app.use(cors(
-    {
-        origin: "http://localhost:5000",
-        methods: "PUT, DELETE, GET, UPDATE, POST",
-        credentials: true
-    }
-))
+app.use(cors(corsOptions));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -89,7 +87,7 @@ passport.deserializeUser((user, done) => {
 
 
 app.use("/api/v1/auth", passportRouter);
-
+app.use("/api/v1/role", roleRouter);
 
 
 app.listen(PORT, () => {

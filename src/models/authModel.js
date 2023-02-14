@@ -1,7 +1,12 @@
 import {DataTypes} from 'sequelize';
 import { sequelize } from '../config/connectDb.js';
+import Role from './role.js';
 
 const Users = sequelize.define("Users", {
+  roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: false
@@ -14,5 +19,13 @@ const Users = sequelize.define("Users", {
     type: DataTypes.STRING
   }  
 });
+
+Users.associations = (models) => {
+    Users.belongsTo(Role, {
+        foreignKey: 'roleId',
+        as: 'role',
+    });
+    return Users;
+}
 
 export default Users;
