@@ -29,6 +29,7 @@
     "react-toastify": "^9.1.1",
     "sequelize": "^6.28.0",
     "sequelize-cli": "^6.6.0",
+    "twilio": "^4.7.2",
     "validator": "^13.9.0"
   }
 }

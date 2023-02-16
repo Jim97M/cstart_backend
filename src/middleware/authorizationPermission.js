@@ -28,7 +28,7 @@ export const StudentRole = (req, res, next) => {
 
         const roleId = result.roleId;
 
-        if (roleId !== 3) {
+        if (roleId !== 1) {
             return res.status(403).send({ msg: "Forbidden" });
         } 
         next();
@@ -64,7 +64,7 @@ export const StudentRole = (req, res, next) => {
 
         const roleId = result.roleId;
 
-        if (roleId !== 1) {
+        if (roleId !== 3) {
             return res.status(403).send({ msg: "Forbidden" });
         } 
         next();
@@ -72,4 +72,3 @@ export const StudentRole = (req, res, next) => {
         return res.status(500).send(error);
     }
  }
-

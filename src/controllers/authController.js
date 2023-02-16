@@ -2,11 +2,10 @@ import dotenv from 'dotenv';
 
 import jwt from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
-import nodemailer from 'nodemailer';
 import {google} from 'googleapis';
+import twilio from 'twilio'; 
 import sendEmail from '../utils/sendEmail.js';
 import Users from "../models/authModel.js";
-import TokenModel from '../models/tokenModel.js';
 import Config from "../config/authConfig.js";
 
 dotenv.config();
@@ -15,33 +14,37 @@ const { OAuth2 } = google.auth;
 
 const client = new OAuth2(process.env.GOOGLE_CLIENT_ID)
 
-const {CLIENT_URL} = process.env
+const {CLIENT_URL} = process.env;
 
-export const Signup = async (req, res) => {
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
+
+const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, {
+    lazyLoading: true
+});
+
+export const Signup = (req, res) => {
   try {
+    const roleId = req.body.roleId;
     const email = req.body.email;
     const password = req.body.password;
-      const confirm_password = req.body.confirm_password;
-    //   const user = await Users.findOne({ email });
-    //   if(!user) {
-    //       return res.status(401).json({
-    //           message: "Invalid email or password",
-    //       });
-    //   }
+    const confirm_password = req.body.confirm_password;
 
-    //   const validPassword = await bcryptjs.compare(password, user.password);
-    //   if (!validPassword) {
-    //       return res.status(401).json({
-    //           message: "Invalid email or password", 
-    //     })
-    //   }
-
-      const newUser = { email, password, confirm_password };
+    if(password !== confirm_password) {
+        console.log("Passwords Do not Match")
+    } else if(!email || !password || !confirm_password) {
+       console.log("Please Provide All Fields")
+    } else {
+       Users.create({
+        roleId: roleId,
+        email: email,
+        password: bcryptjs.hashSync(password, 8)
+       })
+    }
      
-      const activation_token = createActivationToken(newUser);
-      const url = `http://localhost:5000/api/v1/auth/activate/${activation_token}`
-      sendEmail(email, url, "Verify Your EmaiACTIVATION_TOKEN_SECRETl Address")
-      res.status(200).send({message: "Email sent successfully"});
+    //   const activation_token = createActivationToken(newUser);
+    //   const url = `http://localhost:5000/api/v1/auth/activate/${activation_token}`
+    //   sendEmail(email, url, "Verify Your EmaiACTIVATION_TOKEN_SECRETl Address")
+     res.status(200).send({message: "User Registered successfully"});
   } catch (err) {
      res.status(500).send({message: err.message});
   }
@@ -105,4 +108,31 @@ export const activationEmail = async (req, res) => {
 
 const createActivationToken = (payload) => {
     return jwt.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, {expiresIn: '10m'})
+}
+
+export const sendOtp = (req, res) => {
+  const to = req.params.to;
+    twilioClient.verify._v2.services(TWILIO_SERVICE_SID)
+    .verifications.create({to, channel: 'sms'})
+        .then(verification => {
+            res.json(verification)
+})
+        .catch(err => {
+            res.json(err);   
+        })
+
+}
+
+
+export const verifyOtp = async (req, res) => {
+    const to = req.params.to;
+    const code = req.params.code;
+    twilioClient.verify._v2.services(TWILIO_SERVICE_SID)
+        .verificationChecks.create({ to, code })
+        .then(res => {
+        res.status(200).send({msg: "Phone Verified Successfully"});
+        })
+        .catch(err => {
+            res.json(err);
+        })
 }

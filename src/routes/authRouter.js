@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { Signup, Signin, activationEmail } from "../controllers/authController.js";
+import { Signup, Signin, activationEmail, sendOtp, verifyOtp } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -35,5 +35,8 @@ router.get("/facebook/callback", passport.authenticate("facebook", {
   failureRedirect: "/login/failed",
 })
 );
+
+router.get("/send/:to", sendOtp);
+router.get("/verify/:to/:code", verifyOtp);
 
 export default router;
