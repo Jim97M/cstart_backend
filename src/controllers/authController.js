@@ -112,7 +112,7 @@ const createActivationToken = (payload) => {
 
 export const sendOtp = (req, res) => {
   const to = req.params.to;
-    twilioClient.verify._v2.services(TWILIO_SERVICE_SID)
+    twilioClient.verify.services(TWILIO_SERVICE_SID)
     .verifications.create({to, channel: 'sms'})
         .then(verification => {
             res.json(verification)
@@ -123,11 +123,10 @@ export const sendOtp = (req, res) => {
 
 }
 
-
 export const verifyOtp = async (req, res) => {
     const to = req.params.to;
     const code = req.params.code;
-    twilioClient.verify._v2.services(TWILIO_SERVICE_SID)
+    twilioClient.verify.services(TWILIO_SERVICE_SID)
         .verificationChecks.create({ to, code })
         .then(res => {
         res.status(200).send({msg: "Phone Verified Successfully"});
