@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-import jwt from "jsonwebtoken";
+import jsonwebtoken from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
 import {google} from 'googleapis';
 import twilio from 'twilio'; 
