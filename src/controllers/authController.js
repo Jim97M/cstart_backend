@@ -77,6 +77,7 @@ export const Signin = (req, res) => {
             res.status(200).send({
                 id: user.id,
                 email: user.email,
+                roleId: user.roleId,
                 password: user.password,
                 accessToken: token
             })
