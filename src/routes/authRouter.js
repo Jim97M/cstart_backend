@@ -4,7 +4,7 @@ import { Signup, Signin, activationEmail, sendOtp, verifyOtp } from "../controll
 
 const router = express.Router();
 
-const CLIENT_URL = "http://localhost:3010";
+const CLIENT_URL = "http://localhost:3010/home";
 
 router.post("/signup", Signup);
 router.post("/activate", activationEmail);
