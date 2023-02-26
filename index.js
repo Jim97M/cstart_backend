@@ -3,15 +3,17 @@ import cookieSession from "cookie-session";
 import express from "express";
 import cors from "cors";
 import passport from "passport";
+import path from "path";
+import url from "url";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GithubStrategy } from "passport-github2";
 
 import passportRouter from "./src/routes/authRouter.js";
 import roleRouter from "./src/routes/roleRouter.js"; 
+import tutorialRoute from "./src/routes/tutorialRoute.js";
 
 const app = express();
-
 
 const PORT = 5000;
 
@@ -20,6 +22,14 @@ dotenv.config();
 let corsOptions = {
   localhost: "http://localhost:5000"
 };
+
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+console.log(__dirname);
+
+global.__basedir = __dirname;
+
 
 app.use(cookieSession({name: "session", keys: ["cstart"], maxAge: 24 * 60 * 60 * 100}))
 
@@ -85,12 +95,13 @@ passport.deserializeUser((user, done) => {
     done(null, user);
   });
 
-
+app.use("/media", express.static('media'));
 app.use("/api/v1/auth", passportRouter);
 app.use("/api/v1/role", roleRouter);
+app.use("/api/v1/tutorial", tutorialRoute);
 
 
-app.listen(PORT, () => {
+app.listen(PORT, '192.168.0.37', () => {
     console.log("Server Started Successfully" + PORT);
 })
 

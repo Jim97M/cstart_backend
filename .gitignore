@@ -2,3 +2,5 @@ node_modules/
 migrations/
 config/
 .env
+media/
+migrations/
