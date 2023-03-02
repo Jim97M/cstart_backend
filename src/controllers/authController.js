@@ -87,6 +87,22 @@ export const Signin = (req, res) => {
     }
 }
 
+export const forgotPassword = async (req, res) => {
+    try {
+        const auth = Users.findOne({
+            where: {email}
+        })
+        auth.resetToken = randomTokenString();
+        auth.resetTokenExpires = new Date(Date.now() + 24*60*60*1000);
+        await auth.save();
+    
+        // send email
+        await sendPasswordResetEmail(account, origin);
+    } catch (error) {
+        
+    }
+}
+
 export const activationEmail = async (req, res) => {
     try {
        const {activation_token} = req.body;

@@ -2,20 +2,27 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/connectDb.js";
 
 const TokenModel = sequelize.define('TokenModel', {
-      userId: {
+  userId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
       },
-    token: {
+  email: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
+  token: {
         type: DataTypes.STRING,
         required: true,
     },   
-},
+  used: {
+     type: DataTypes.INTEGER,
+     required: true,
+   }
+     },
     {
     timestamps: false, 
 
     });
-
 
 TokenModel.associations = (models) => {
   TokenModel.belongsTo(Users, {

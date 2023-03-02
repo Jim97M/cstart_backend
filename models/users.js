@@ -17,7 +17,13 @@ module.exports = (sequelize, DataTypes) => {
     roleId: DataTypes.INTEGER,
     email: DataTypes.STRING,
     password: DataTypes.STRING,
-    confirm_password: DataTypes.STRING
+    confirm_password: DataTypes.STRING,
+    verificationToken: DataTypes.STRING,
+    verified: DataTypes.DATE,
+    resetToken: DataTypes.STRING,
+    resetTokenExpires: DataTypes.DATE,
+    passwordReset: DataTypes.DATE,
+    isVerified: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Users',

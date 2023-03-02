@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Backend",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-migration": "npx sequelize-cli model:generate --name",
+    "migrate": "npx sequelize-cli db:migrate"
   },
   "author": "James Masika",
   "license": "ISC",
@@ -32,6 +33,7 @@
     "react-toastify": "^9.1.1",
     "sequelize": "^6.28.0",
     "sequelize-cli": "^6.6.0",
+    "swagger-ui-express": "^4.6.2",
     "twilio": "^4.7.2",
     "url": "^0.11.0",
     "validator": "^13.9.0"
