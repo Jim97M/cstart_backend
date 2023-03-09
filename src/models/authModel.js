@@ -21,22 +21,9 @@ const Users = sequelize.define("Users", {
   verificationToken: { 
     type: DataTypes.STRING
    },
-  verified: { 
-    type: DataTypes.DATE 
-  },
-  resetToken: {
+  token: {
      type: DataTypes.STRING
      },
-  resetTokenExpires: {
-     type: DataTypes.DATE
-     },
-  passwordReset: { 
-    type: DataTypes.DATE 
-  },
-  isVerified: {
-    type: DataTypes.VIRTUAL(DataTypes.BOOLEAN),
-    get() { return !!(this.verified || this.passwordReset); }
-}
 });
 
 Users.associations = (models) => {

@@ -101,7 +101,7 @@ app.use("/api/v1/role", roleRouter);
 app.use("/api/v1/tutorial", tutorialRoute);
 
 
-app.listen(PORT, '192.168.0.37', () => {
+app.listen(PORT, () => {
     console.log("Server Started Successfully" + PORT);
 })
 

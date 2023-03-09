@@ -51,9 +51,10 @@ export const Signup = (req, res) => {
 }
 
 export const Signin = (req, res) => {
+    const {email} = req.body;
     try {
         Users.findOne({
-            where: {email: req.body.email}
+            where: {email: email}
         }).then(user => {
             if(!user){
                 return res.status(404).send({message: "User not Found."});
@@ -87,26 +88,118 @@ export const Signin = (req, res) => {
     }
 }
 
-export const forgotPassword = async (req, res) => {
-    try {
-        const auth = Users.findOne({
-            where: {email}
-        })
-        auth.resetToken = randomTokenString();
-        auth.resetTokenExpires = new Date(Date.now() + 24*60*60*1000);
-        await auth.save();
+export const sendPasswordResetEmail = async (req, res, next ) => {
+    const {email} = req.body;
+
+    if(!email){
+        res.status(401).json({status:401,message:"Enter Your Email"})
+    }
+
+    try {    
+        Users.findOne({
+        where: {email: email}
+    }).then(user  => {
+        if(!user){
+            return res.status(404).send({message: "User not Found."});
+        }
+
     
-        // send email
-        await sendPasswordResetEmail(account, origin);
+
+        let token = jsonwebtoken.sign({id: user.id}, Config.secret, {
+            expiresIn: "180s",
+        });
+
+        const setUserToken =  Users.update({id: user.id}, {verificationToken: token}, {new: true});
+      
+        if(setUserToken){
+
+           const url = `http://localhost:5000/api/v1/auth/forgotpassword/${user.id}/${setUserToken.verificationToken}`
+           sendEmail(email, url, "Your Password Reset Link")
+
+        }
+    }) 
+    } catch (error) {
+        res.status(401).json({status:401, error})
+    }
+
+}
+
+export const forgotPassword = async (req, res) => {
+
+    const {id, token} = req.params;
+
+    try {
+        Users.findOne({where: {email:email, verificationToken: token}}).then(user => {
+            const verifyToken = jsonwebtoken.verify(token, Config.secret);
+            console.log(verifyToken);
+
+            if(user && verifyToken.id) {
+             
+            res.status(201).json({status:201,validuser}) 
+            } else {
+                res.status(401).json({status:401,message:"user not exist"})
+            }
+        })
     } catch (error) {
         
+        res.status(401).json({status:401,error})
     }
+}
+
+// change password
+
+export const resetPassword = async(req,res)=>{
+    const {id,token} = req.params;
+
+    const {password} = req.body;
+
+    try {
+        Users.findOne({where: {email:email, verificationToken: token}}).then(user => {
+            const verifyToken = jsonwebtoken.verify(token, Config.secret);
+            console.log(verifyToken);
+
+            if(user && verifyToken.id) {
+                const newpassword = bcryptjs.hash(password, 12);
+
+                const setnewuserpass = Users.update({id: id}, {password: newpassword});
+               
+                setnewuserpass.save();
+
+
+                res.status(201).json({status:201,setnewuserpass})
+
+            } else{
+                res.status(401).json({status:401,message:"user not exist"})
+            }
+        })
+    } catch (error) {
+        res.status(401).json({status:401,error})
+    }
+}
+
+export const validUser = (req, res) => {
+  try {
+    Users.findOne({
+        where: {email: req.body.email}
+    }).then(user => {
+        if(!user){
+            return res.status(404).send({message: "User not Found."});
+        } else
+        res.status(200).send({
+            id: user.id,
+            email: user.email,
+            roleId: user.roleId,
+        })
+    }) 
+  } catch (error) {
+    
+  }
 }
 
 export const activationEmail = async (req, res) => {
     try {
        const {activation_token} = req.body;
-       const user = jwt.verify(activation_token, process.env.ACTIVATION_TOKEN_SECRET);
+       const user = jsonwebtoken.verify(activation_token, process.env.ACTIVATION_TOKEN_SECRET);
        const {email, password} = user;
        const findUser = await Users.findOne({email});
 
@@ -124,7 +217,7 @@ export const activationEmail = async (req, res) => {
   }
 
 const createActivationToken = (payload) => {
-    return jwt.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, {expiresIn: '10m'})
+    return jsonwebtoken.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, {expiresIn: '10m'})
 }
 
 export const sendOtp = (req, res) => {
@@ -137,7 +230,6 @@ export const sendOtp = (req, res) => {
         .catch(err => {
             res.json(err);   
         })
-
 }
 
 export const verifyOtp = async (req, res) => {

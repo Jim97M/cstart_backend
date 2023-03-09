@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { Signup, Signin, activationEmail, sendOtp, verifyOtp } from "../controllers/authController.js";
+import { Signup, Signin, activationEmail, sendOtp, verifyOtp, sendPasswordResetEmail, forgotPassword, resetPassword, validUser } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -38,5 +38,12 @@ router.get("/facebook/callback", passport.authenticate("facebook", {
 
 router.get("/send/:to", sendOtp);
 router.get("/verify/:to/:code", verifyOtp);
+
+router.post("/sendpasswordlink", sendPasswordResetEmail);
+
+router.post("/id:/:token", resetPassword);
+
+router.post("/forgotpassword/:id/:token", forgotPassword);
+router.get("/validuser", validUser);
 
 export default router;
