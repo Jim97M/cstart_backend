@@ -19,7 +19,7 @@ const Likes = sequelize.define('Likes', {
     onUpdate: "cascade",
     onDelete: "cascade",
          },
-    usersId: {
+    userId: {
         type: DataTypes.INTEGER,
         references: {
           model: "Users",
@@ -48,6 +48,14 @@ Likes.associations = (models) => {
     Likes.belongsTo(Users, {
         foreignKey: "usersId",
         targetKey: "id",
+    })
+    Tutorials.hasMany(Likes, {
+        foreignKey: 'tutotialId',
+        targetKey: "id"
+    })
+    Users.hasMany(Likes, {
+        foreignKey: 'userId',
+        targetKey: "id"
     })
     return Likes;
 }

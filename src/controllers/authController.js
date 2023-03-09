@@ -26,25 +26,37 @@ export const Signup = (req, res) => {
   try {
     const roleId = req.body.roleId;
     const email = req.body.email;
+    const phone_number = req.body.phone_number;
+    const fullname = req.body.fullname; 
+    const image_name = "http://192.168.0.37:5000/media/"+ req.file.filename;
+    const image_type = req.file.mimetype;
     const password = req.body.password;
     const confirm_password = req.body.confirm_password;
+    
 
-    if(password !== confirm_password) {
+    const user = Users.findOne({where : {email: email}});
+
+    if(user){
+        res.status(403).send({message: "User Already Exists"});
+    } else if(password !== confirm_password) {
         console.log("Passwords Do not Match")
-    } else if(!email || !password || !confirm_password) {
+    } else if(!email || !password || !fullname) {
        console.log("Please Provide All Fields")
     } else {
        Users.create({
         roleId: roleId,
         email: email,
+        phone_number: phone_number,
+        fullname: fullname,
+        image_name: image_name,
+        image_type: image_type,
         password: bcryptjs.hashSync(password, 8)
        })
     }
-     
     //   const activation_token = createActivationToken(newUser);
     //   const url = `http://localhost:5000/api/v1/auth/activate/${activation_token}`
     //   sendEmail(email, url, "Verify Your EmaiACTIVATION_TOKEN_SECRETl Address")
-     res.status(200).send({message: "User Registered successfully"});
+     res.status(201).send({message: "User Registered successfully"});
   } catch (err) {
      res.status(500).send({message: err.message});
   }
@@ -244,3 +256,28 @@ export const verifyOtp = async (req, res) => {
             res.json(err);
         })
 }
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, __basedir + '/media')
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+ })
+
+export const upload = multer({
+    storage: storage,
+    limits: {fileSize: '100000'},
+    fileFilter: (req, file, cb) => {
+        const fileTypes = /mp4|mkv/
+        const mimeType = fileTypes.test(file.mimetype)
+        const extname = fileTypes.test(path.extname(file.originalname))
+
+            if(mimeType && extname) {
+                return cb(null, true)
+            }
+            cb('Give proper files formate to upload')
+        }
+}).single('video');
+

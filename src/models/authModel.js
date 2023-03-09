@@ -6,17 +6,29 @@ const Users = sequelize.define("Users", {
   roleId: {
         type: DataTypes.INTEGER,
         allowNull: true,
+        defaultValue: 3
+  },
+  fullname: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true,
+  },
+  phone_number: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  image_type: {
+    type: DataTypes.STRING,
+   },
+  image_name: {
+    type: DataTypes.STRING
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
-  },
-  confirm_password: {
-    type: DataTypes.STRING
+    allowNull: true,
   },
   verificationToken: { 
     type: DataTypes.STRING
