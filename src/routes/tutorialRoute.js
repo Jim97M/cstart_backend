@@ -4,5 +4,6 @@ const router = express.Router();
 
 router.post("/tutorial", tutorialController.upload, tutorialController.uploadTutorial);
 router.get("/alltutorials", tutorialController.getAllTutorials);
+router.get("/tutorial/:id", tutorialController.getTutorialId);
 
 export default router;

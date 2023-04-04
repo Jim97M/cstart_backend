@@ -1,15 +1,17 @@
 import express from "express";
 import passport from "passport";
-import { Signup, Signin, activationEmail, sendOtp, verifyOtp, sendPasswordResetEmail, forgotPassword, resetPassword, validUser } from "../controllers/authController.js";
+import { Signup, Signin, activationEmail, sendOtp, verifyOtp, sendPasswordResetEmail, forgotPassword, resetPassword, validUser, getAllUsers, getSingleUser } from "../controllers/authController.js";
 
 const router = express.Router();
 
 const CLIENT_URL = "http://localhost:3010/home";
 
 router.post("/signup", Signup);
-router.post("/activate", activationEmail);
+router.post("/activate/:confirmationCode", activationEmail);
 router.post("/signin", Signin);
 
+router.get('/allusers', getAllUsers);
+router.get('/user/:id', getSingleUser);
 router.get("/google", passport.authenticate("google", {scope:["profile"]}));
 
 router.get(

@@ -18,13 +18,23 @@ export const uploadTutorial = (req, res) => {
     }
 }
 
+export const getTutorialId = (req, res) => {
+    const t_id = req.params.id;
+    Tutorials.findByPk(t_id).then(tutorial => {
+     if(!tutorial){
+         res.status(404).json({message: "Tutorial Not Found"});
+         next();
+     } else {
+         res.json(tutorial)
+     }
+    }).catch()
+}
 
 export const getAllTutorials = async (req, res) => {
     await Tutorials.findAll().then(data => {
       return res.status(200).send(data);
    });
 }
-
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {

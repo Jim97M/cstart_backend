@@ -23,7 +23,7 @@ let corsOptions = {
   localhost: "http://localhost:5000"
 };
 
-
+app.use(express.json());
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 console.log(__dirname);
@@ -38,7 +38,6 @@ app.use(cors(corsOptions));
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.json());
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -86,7 +85,6 @@ passport.use(
 //     )
 // )
 
-
 passport.serializeUser((user, done) => {
     done(null, user);
   });
@@ -101,7 +99,7 @@ app.use("/api/v1/role", roleRouter);
 app.use("/api/v1/tutorial", tutorialRoute);
 
 
-app.listen(PORT, () => {
+app.listen(PORT, '192.168.0.37', () => {
     console.log("Server Started Successfully" + PORT);
 })
 

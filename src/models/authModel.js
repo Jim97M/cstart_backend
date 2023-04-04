@@ -16,26 +16,24 @@ const Users = sequelize.define("Users", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  status: {
+    type: DataTypes.ENUM,
+    values: ['Pending', 'Active'],
+     defaultValue: 'Pending',
+     allowNull: true
+  },
+  confirmationCode: {
+    type: DataTypes.STRING,
+    unique: true,
+  },
   phone_number: {
     type: DataTypes.INTEGER,
     allowNull: true,
-  },
-  image_type: {
-    type: DataTypes.STRING,
-   },
-  image_name: {
-    type: DataTypes.STRING
   },
   password: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  verificationToken: { 
-    type: DataTypes.STRING
-   },
-  token: {
-     type: DataTypes.STRING
-     },
 });
 
 Users.associations = (models) => {

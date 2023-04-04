@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
-
+import { Op } from 'sequelize';
 import jsonwebtoken from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
 import {google} from 'googleapis';
 import twilio from 'twilio'; 
+import multer from "multer";
+import path from "path";
 import sendEmail from '../utils/sendEmail.js';
 import Users from "../models/authModel.js";
 import Config from "../config/authConfig.js";
@@ -22,25 +24,29 @@ const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, {
     lazyLoading: true
 });
 
-export const Signup = (req, res) => {
+export const Signup = async (req, res) => {
+    const token = jsonwebtoken.sign({email: req.body.email}, Config.secret);
   try {
     const roleId = req.body.roleId;
     const email = req.body.email;
     const phone_number = req.body.phone_number;
     const fullname = req.body.fullname; 
-    const image_name = "http://192.168.0.37:5000/media/"+ req.file.filename;
-    const image_type = req.file.mimetype;
+    const confirmationCode = token;
     const password = req.body.password;
     const confirm_password = req.body.confirm_password;
     
+    let user = await Users.findOne({where: {email : email}});
 
-    const user = Users.findOne({where : {email: email}});
-
-    if(user){
-        res.status(403).send({message: "User Already Exists"});
-    } else if(password !== confirm_password) {
-        console.log("Passwords Do not Match")
-    } else if(!email || !password || !fullname) {
+   
+   if(user){
+       return res.status(403).send({message: "User Already Exists"});
+    }     if(password !== confirm_password) {
+        return res.status(400).send({
+         message: 'Please provide all fields'
+     })
+     }
+    
+    else if(!email || !password || !fullname) {
        console.log("Please Provide All Fields")
     } else {
        Users.create({
@@ -48,20 +54,18 @@ export const Signup = (req, res) => {
         email: email,
         phone_number: phone_number,
         fullname: fullname,
-        image_name: image_name,
-        image_type: image_type,
+        confirmationCode,
         password: bcryptjs.hashSync(password, 8)
        })
     }
-    //   const activation_token = createActivationToken(newUser);
-    //   const url = `http://localhost:5000/api/v1/auth/activate/${activation_token}`
-    //   sendEmail(email, url, "Verify Your EmaiACTIVATION_TOKEN_SECRETl Address")
-     res.status(201).send({message: "User Registered successfully"});
+    const url = `http://localhost:5000/api/v1/auth/activate/:${confirmationCode}`
+     sendEmail(email, url, "Verify Your Email Address")
+    return res.status(201).send({message: "User Registered successfully"});
   } catch (err) {
-     res.status(500).send({message: err.message});
+   return  res.status(500).send({message: err.message});
   }
 }
-
+    
 export const Signin = (req, res) => {
     const {email} = req.body;
     try {
@@ -208,29 +212,43 @@ export const validUser = (req, res) => {
   }
 }
 
-export const activationEmail = async (req, res) => {
-    try {
-       const {activation_token} = req.body;
-       const user = jsonwebtoken.verify(activation_token, process.env.ACTIVATION_TOKEN_SECRET);
-       const {email, password} = user;
-       const findUser = await Users.findOne({email});
-
-       if(findUser) return res.status(400).json({msg: "This email already exists"});
-
-       const newUser = new Users({
-         email, password
-       });
-
-       await newUser.save();
-       res.json({msg: "Account has been activated"});
-    } catch (err) {
-      return res.status(500).json({message: err.message});
+export const getSingleUser = async (req, res, next) => {
+   const a_id = req.params.id;
+   Users.findByPk(a_id).then(user => {
+    if(!user){
+        res.status(404).json({message: "User Not Found"});
+        next();
+    } else {
+        res.json(user)
     }
-  }
-
-const createActivationToken = (payload) => {
-    return jsonwebtoken.sign(payload, process.env.ACTIVATION_TOKEN_SECRET, {expiresIn: '10m'})
+   }).catch()
 }
+
+
+export const getAllUsers = async (req, res) => {
+   await Users.findAll().then(data => {
+      res.status(200).send(data);
+   });
+};
+
+export const activationEmail = async (req, res) => {
+        Users.findOne({
+            confirmationCode: req.params.confirmationCode
+        })
+        .then((user) => {
+            console.log(user);
+            if(!user) {
+                return res.status(404).send({message: "User Not Found"});
+            }
+           user.status = "Active";
+           user.save((err) => {
+            if(err){
+                res.status(500).send({message: err});
+            }
+           }); 
+        })
+        .catch((e) => console.log("error", e));
+  }
 
 export const sendOtp = (req, res) => {
   const to = req.params.to;
@@ -259,25 +277,24 @@ export const verifyOtp = async (req, res) => {
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, __basedir + '/media')
+      cb(null, __basedir + '/media');
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname))
-    }
- })
+      cb(null, Date.now() + path.extname(file.originalname));
+    } 
+  });
 
-export const upload = multer({
+ export const upload = multer({
     storage: storage,
-    limits: {fileSize: '100000'},
+    limits: {fileSize: '1000000'},
     fileFilter: (req, file, cb) => {
-        const fileTypes = /mp4|mkv/
-        const mimeType = fileTypes.test(file.mimetype)
+        const fileTypes = /jpeg||jpg||png||gif/
+        const mimeTypes = fileTypes.test(file.mimetype)
         const extname = fileTypes.test(path.extname(file.originalname))
 
-            if(mimeType && extname) {
-                return cb(null, true)
-            }
-            cb('Give proper files formate to upload')
+        if(mimeTypes && extname){
+          return cb(null, true)
         }
-}).single('video');
-
+        cb('Please upload proper file type');
+    }
+}).single('image');
